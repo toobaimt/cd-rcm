@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CD-RCM: Generalizable Continuous-Depth Novel View Synthesis for Reflectance Confocal Microscopy</title>
+  <meta name="description" content="CD-RCM: Generalizable Continuous-Depth Novel View Synthesis for Reflectance Confocal Microscopy. NeurIPS 2026.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CD-RCM: Continuous-Depth Novel View Synthesis for Reflectance Confocal Microscopy">
+  <meta property="og:description" content="NeurIPS 2026. A feedforward model that synthesizes RCM sections at arbitrary unseen depths from sparse skin z-stacks.">
+  <meta property="og:url" content="https://toobaimt.github.io/cd-rcm/">
+  <meta property="og:image" content="https://toobaimt.github.io/cd-rcm/cd-rcm-files/overview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+  <style>
+    /* Styled after the LVT project page (Bulma defaults: system sans, centered titles, justified body) */
+    :root {
+      --bg: #fff;
+      --ink: #333;
+      --title: #363636;
+      --muted: #7a7a7a;
+      --rule: #dbdbdb;
+      --link: #3273dc;
+      --dark: #363636;
+      --panel: #f5f5f5;
+      --row-hi: #eef3fb;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 1rem/1.5 BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* One centered column; text and media stay centered at every width */
+    main { width: 100%; max-width: 48rem; margin: 0 auto; padding: 3rem 1.25rem 3rem; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { color: var(--title); }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 4px; }
+
+    /* Header */
+    header, header p { text-align: center; }
+    h1 {
+      color: var(--title);
+      font-weight: 600;
+      font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+      line-height: 1.2;
+      margin: 0 auto 0.75rem;
+    }
+    .venue { color: #4a4a4a; font-size: 1.5rem; line-height: 1.25; margin: 0 0 1.25rem; }
+    .authors { list-style: none; padding: 0; margin: 0 0 0.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem 1.5rem; font-size: 1.05rem; }
+    .affil, .note { font-size: 1rem; margin: 0.25rem auto; text-align: center; }
+    .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+    .links a, .links span {
+      display: inline-flex; align-items: center; gap: 0.4em; height: 2.5em; padding: 0 1.25em; border-radius: 290486px;
+      background: var(--dark); color: #fff; font-size: 1rem; border: 1px solid transparent;
+    }
+    .links a:hover { background: #2f2f2f; color: #fff; }
+    .links span { background: transparent; color: var(--muted); border: 1px dashed var(--rule); }
+
+    /* Sections */
+    section { margin-top: 3rem; }
+    h2 { color: var(--title); font-weight: 600; font-size: 2rem; line-height: 1.125; text-align: center; margin: 0 0 1.25rem; }
+    h3 { color: var(--title); font-weight: 600; font-size: 1.25rem; text-align: center; margin: 2rem 0 0.75rem; }
+    p { margin: 0 auto 1.25rem; font-size: 1rem; line-height: 1.5; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+    @media (max-width: 550px) { p { text-align: left; } h2 { font-size: 1.6rem; } .venue { font-size: 1.15rem; } }
+
+    /* Figures */
+    figure { margin: 1.75rem auto; text-align: center; }
+    .plate { background: #fff; }
+    .plate img { display: block; width: 100%; height: auto; margin: 0 auto; }
+    .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .scroll-x .plate { min-width: 46rem; }
+    figcaption { color: #4a4a4a; font-size: 0.95rem; line-height: 1.5; margin: 0.75rem auto 0; text-align: justify; }
+    figcaption b { color: var(--title); font-weight: 600; }
+    .hint { display: none; color: var(--muted); font-size: 0.85rem; margin-top: 0.4rem; text-align: center; }
+    @media (max-width: 760px) { .hint { display: block; } }
+
+    .video { position: relative; aspect-ratio: 16 / 9; border-radius: 15px; overflow: hidden; background: var(--panel); }
+    .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .film { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 10px; background: #f3f2f2; margin: 0 auto; }
+
+    /* Stats strip */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1.25rem; margin: 2rem 0 0; padding: 0; list-style: none; text-align: center; }
+    .stats strong { display: block; color: var(--title); font-size: 1.75rem; font-weight: 600; line-height: 1.2; }
+    .stats span { color: #4a4a4a; font-size: 0.9rem; }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; margin: 1.5rem 0 0.5rem; }
+    table { border-collapse: collapse; width: 100%; min-width: 34rem; font-size: 0.95rem; color: var(--title); }
+    th, td { padding: 0.5em 0.75em; text-align: center; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; }
+    thead th { font-weight: 600; border-bottom-width: 2px; }
+    tr.group td { border-top: 2px solid var(--rule); }
+    tr.ours td { background: var(--row-hi); font-weight: 600; }
+    td u { text-decoration-color: var(--muted); text-underline-offset: 3px; }
+    .table-note { color: var(--muted); font-size: 0.875rem; margin: 0.25rem auto 0; text-align: center; }
+    .two-up { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    .two-up table { min-width: 26rem; }
+
+    /* BibTeX */
+    .bib { position: relative; }
+    pre {
+      background: var(--panel); color: #4a4a4a; border-radius: 10px; padding: 1.25em 1.5em; margin: 0; text-align: left;
+      overflow-x: auto; font: 0.875em/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .copy {
+      position: absolute; top: 0.6rem; right: 0.6rem; cursor: pointer; font: inherit; font-size: 0.8rem;
+      background: #fff; color: var(--title); border: 1px solid var(--rule); border-radius: 290486px; padding: 0.25rem 0.8rem;
+    }
+    .copy:hover { border-color: #b5b5b5; }
+
+    footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.9rem; text-align: center; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>CD-RCM: Generalizable Continuous-Depth Novel View Synthesis for Reflectance Confocal Microscopy</h1>
+    <p class="venue">NeurIPS 2026</p>
+
+    <ul class="authors">
+      <li><a href="https://toobaimt.github.io">Tooba Imtiaz</a><sup>1</sup></li>
+      <li><a href="https://www.mskcc.org/research-areas/labs/milind-rajadhyaksha">Milind Rajadhyaksha</a><sup>2</sup></li><!-- TODO: add homepage -->
+      <li><a href="https://www.arch.columbia.edu/faculty/5560-kivanc-kose">Kivanc Kose</a><sup>2,*</sup></li><!-- TODO: add homepage -->
+      <li><a href="https://mllabneu.github.io">Jennifer Dy</a><sup>1,*</sup></li>
+    </ul>
+    <p class="affil"><sup>1</sup>Northeastern University &nbsp;&nbsp; <sup>2</sup>Memorial Sloan Kettering Cancer Center</p>
+    <p class="note"><sup>*</sup>Equal contribution</p>
+
+    <ul class="links">
+      <li><a href="https://neurips.cc/virtual/2026/poster/156085">Paper</a></li>
+      <li><a href="https://arxiv.org/abs/2606.12635">arXiv</a></li>
+      <li><a href="https://recorder-v3.slideslive.com/?share=113470&amp;s=2eb5fe7f-dc49-4b39-9fc5-51cfddcbeebd">NeurIPS Talk</a></li>
+      <li><a href="#bibtex">BibTeX</a></li>
+    </ul>
+  </header>
+
+  <section id="talk">
+    <div class="video">
+      <iframe src="https://www.youtube-nocookie.com/embed/K15EWVQ45Y4" title="CD-RCM talk at Voxel51’s Boston Physical AI Workshop" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <ul class="stats">
+    <li><strong>~6×</strong><span>lateral vs. axial resolution gap (0.5 µm vs. ~3 µm) that CD-RCM fills in</span></li>
+    <li><strong>0.8 s</strong><span>to densify a full stack 10× on a single NVIDIA A6000</span></li>
+    <li><strong>1 pass</strong><span>feedforward inference, no per-stack optimization</span></li>
+    <li><strong>22 / 25</strong><span>cases where a blinded RCM expert picked CD-RCM as closest to ground truth</span></li>
+  </ul>
+
+  <section id="abstract">
+    <h2>Abstract</h2>
+    <p>Reflectance confocal microscopy (RCM) provides noninvasive, cellular-resolution “optical biopsies” of human skin <em>in vivo</em> by acquiring en-face images at successive depths, forming a sparse <em>z</em>-stack. Due to optical limitations, these stacks are anisotropic 3D volumes with lateral resolution (0.5 µm) ~6 times higher compared to axial resolution, which is defined by the optical sectioning (3 µm), limiting the interpretation of tissue. Our goal is to provide continuous-depth visualization by interpolating intermediate sections and making the 3D volume isotropic. Such a representation permits arbitrary-direction sectioning, including histopathology-like cross-sectional examination, without requiring per-patient optimization.</p>
+    <p>To that end, we introduce the first RCM-specific novel-view synthesis (NVS) approach, CD-RCM, a feedforward model that predicts realistic, unseen depths from sparsely sampled RCM stacks. Classical neural rendering methods focus on reconstruction from surface-level multi-view observations. In contrast to surface-level camera views, RCM can acquire optically sectioned en-face images of tissue beyond the surface up to 200 µm. However, during visualization of the RCM stacks, observations of the shallower sections (towards the surface) obscure the deeper ones. This unique axial imaging geometry and layer-dependent anatomical organization motivated our development of a tailored architectural and training framework that explicitly accounts for RCM’s depth-resolved, occlusive imaging physics. Experiments demonstrate that CD-RCM achieves high-fidelity novel-view synthesis with sub-second inference time.</p>
+  </section>
+
+  <section id="rcm">
+    <h2>Why RCM needs its own view synthesis</h2>
+    <p>RCM images living skin at cellular resolution by recording en-face sections at successive depths, typically 50–65 slices reaching 150–200 µm into the tissue. Each slice is sharp across (about 0.5 µm), but depth is sampled far more coarsely (about 3 µm optical sectioning), so cutting across the stack reveals blocky, staircase-like structure.</p>
+    <figure>
+      <video class="film" data-inline autoplay muted loop playsinline disablepictureinpicture preload="auto" poster="./cd-rcm-files/videos/rcm-stack-poster.jpg" width="1280" height="720" aria-label="Animation: RCM slices build into a z-stack, the lateral vs. axial resolution gap is shown, and a sparse cross-section reveals staircase artifacts.">
+        <source src="./cd-rcm-files/videos/rcm-stack.mp4" type="video/mp4">
+      </video>
+    </figure>
+    <p>Neural rendering usually reconstructs opaque objects from cameras placed around them, relying on parallax between viewpoints. RCM works differently: a confocal pinhole selects one thin optical section at a time, and the microscope steps the focal plane down through the tissue. Every slice shares the same lateral field of view, and the only thing that changes between slices is depth.</p>
+    <figure>
+      <div class="plate"><img src="./cd-rcm-files/imaging-modalities.png" alt="Three imaging paradigms: surface-level imaging with cameras around an opaque object, CT with X-ray projections, and RCM capturing en-face slices at successive depths of skin." loading="lazy" width="2000" height="600"></div>
+      <figcaption><b>Comparison of imaging paradigms.</b> (a) Surface-level imaging reconstructs opaque objects from multiple posed viewpoints with geometric parallax. (b) CT acquires transmission projections from multiple angles and reconstructs 3D structure from X-ray attenuation. (c) RCM performs axial optical sectioning, capturing discrete en-face slices of internal tissue at successive depths.</figcaption>
+    </figure>
+  </section>
+
+  <section id="method">
+    <h2>How it works</h2>
+    <figure>
+      <div class="plate"><img src="./cd-rcm-files/overview.png" alt="CD-RCM pipeline: sparse input RCM slices and Plücker rays are patchified and passed through 24 transformer blocks with target ray tokens; updated target tokens are unpatchified into the predicted slice and compared with ground truth." loading="lazy" width="2400" height="751"></div>
+      <figcaption><b>Overview of CD-RCM.</b> Sparse input RCM slices and their Plücker ray embeddings are mapped to a unified token space and processed by a decoder-only transformer. Target ray tokens condition the synthesis; updated target tokens are decoded to produce the predicted slice. Training uses a weighted combination of photometric, LPIPS, and skin-specific perceptual feature (SPF) loss.</figcaption>
+    </figure>
+
+    <h3>A virtual camera that only moves in depth</h3>
+    <p>RCM has no physical camera parameters, but its acquisition gives strong geometric priors: consecutive slices are laterally aligned and differ only in axial position. We model each slice as a pinhole camera with fixed orientation translated along <em>z</em>, canonicalize each stack into a shared normalized coordinate system, and compute pixel-wise Plücker ray embeddings from these virtual cameras. This lets us reuse transformer architectures built for multi-view geometry.</p>
+    <figure>
+      <video class="film" data-inline autoplay muted loop playsinline disablepictureinpicture preload="auto" poster="./cd-rcm-files/videos/virtual-camera-poster.jpg" width="1280" height="720" aria-label="Animation: a virtual pinhole camera translates along z through the stack, casting Plücker rays onto each slice.">
+        <source src="./cd-rcm-files/videos/virtual-camera.mp4" type="video/mp4">
+      </video>
+    </figure>
+
+    <h3>Depth-queryable transformer</h3>
+    <p>Input slices are patchified and concatenated with their ray embeddings into input tokens; each target depth contributes ray-only tokens. A 24-block decoder-only transformer with bidirectional attention processes both together, and only the updated target tokens are decoded back into pixels. Because target depths are just ray queries, CD-RCM can synthesize slices at any position between the acquired sections, including non-integer slice indices.</p>
+    <figure>
+      <video class="film" data-inline autoplay muted loop playsinline disablepictureinpicture preload="auto" poster="./cd-rcm-files/videos/model-poster.jpg" width="1280" height="720" aria-label="Animation: three input slices and target depth rays are patchified, pass through 24 transformer blocks, and are unpatchified into a predicted slice at an unseen depth.">
+        <source src="./cd-rcm-files/videos/model.mp4" type="video/mp4">
+      </video>
+    </figure>
+
+    <h3>Skin-specific perceptual loss</h3>
+    <p>Standard perceptual losses are tuned to natural-image semantics, not the speckle, cellular morphology, and layer-dependent contrast that dominate RCM. We adapt a DINOv3 ViT to the skin domain with LoRA, using self-distillation on a large auxiliary set of RCM mosaic crops, then freeze it and use its features as an additional training loss that encourages preservation of diagnostically relevant detail.</p>
+
+    <h3>Training and inference</h3>
+    <p>During training, we sample runs of nine consecutive slices, use the first, middle, and last as inputs, and supervise four randomly chosen intermediate slices. Randomizing which depths are supervised prevents overfitting to fixed spacing. At inference, CD-RCM takes any three evenly spaced slices and predicts arbitrary intermediate depths in a single forward pass.</p>
+  </section>
+
+  <section id="results">
+    <h2>Results</h2>
+    <p>We evaluate on 216 <em>in vivo</em> RCM stacks of healthy skin (156 train, 60 test), each with 50–65 en-face sections acquired on a VivaScope 1500. We compare against four classical interpolation methods and two learned baselines: a per-stack NeRF-like coordinate MLP and FILM frame interpolation.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>PSNR ↑</th><th>SSIM ↑</th><th>LPIPS ↓</th><th>L<sub>SPF</sub> ↓</th></tr></thead>
+        <tbody>
+          <tr><td>Bilinear interpolation</td><td>21.98</td><td>0.471</td><td>0.377</td><td><u>0.153</u></td></tr>
+          <tr><td>B-spline interpolation</td><td>22.02</td><td>0.471</td><td><u>0.375</u></td><td>0.161</td></tr>
+          <tr><td>Cubic spline interpolation</td><td>22.09</td><td>0.469</td><td>0.378</td><td>0.163</td></tr>
+          <tr><td>Gaussian interpolation</td><td><u>22.87</u></td><td><u>0.522</u></td><td>0.477</td><td>0.164</td></tr>
+          <tr class="group"><td>MLP (NeRF)</td><td>19.10</td><td>0.445</td><td>0.520</td><td>0.480</td></tr>
+          <tr><td>FILM zero-shot (pretrained)</td><td>20.24</td><td>0.380</td><td>0.440</td><td>0.156</td></tr>
+          <tr><td>FILM fine-tuned (5 epochs)</td><td>22.83</td><td>0.510</td><td>0.496</td><td>0.181</td></tr>
+          <tr class="group ours"><td>CD-RCM (ours)</td><td>23.36</td><td>0.581</td><td>0.314</td><td>0.145</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Second-best results are underlined.</p>
+
+    <p style="margin-top:1.5rem">Gaussian interpolation and fine-tuned FILM raise PSNR by smoothing, but that blur erases the fine detail clinicians rely on and worsens perceptual metrics. The per-stack MLP fits the observed slices yet fails on unseen depths, showing that a cross-stack anatomical prior matters. CD-RCM is the only method that improves photometric and perceptual fidelity together.</p>
+
+    <figure>
+      <div class="scroll-x"><div class="plate"><img src="./cd-rcm-files/qualitative-results.jpg" alt="Grid comparing inputs, interpolation baselines, MLP, FILM, CD-RCM variants and ground truth across three skin stacks, with zoomed insets." loading="lazy" width="3200" height="1437"></div></div>
+      <p class="hint">Scroll sideways to see the full figure.</p>
+      <figcaption><b>Qualitative comparison of novel-depth synthesis methods.</b> CD-RCM better preserves fine cellular structures and depth-dependent morphology, producing predictions closest to the ground truth. Insets highlight representative structural differences and reconstruction artifacts.</figcaption>
+    </figure>
+  </section>
+
+  <section id="isotropic">
+    <h2>Isotropic 3D and arbitrary sectioning</h2>
+    <p>Densifying stacks with CD-RCM so that axial sampling matches the lateral resolution turns them into isotropic volumes that can be cut in any direction. Sagittal, coronal, and oblique sections lose the staircase artifacts of the sparse input stacks and reveal continuous tissue morphology, which may help identify clinically relevant landmarks such as the dermal–epidermal junction.</p>
+    <figure>
+      <video class="film" data-inline autoplay muted loop playsinline disablepictureinpicture preload="auto" poster="./cd-rcm-files/videos/densify-poster.jpg" width="1280" height="720" aria-label="Animation: a wipe from the sparse cross-section to the CD-RCM densified cross-section; 10× densification in 0.8 seconds.">
+        <source src="./cd-rcm-files/videos/densify.mp4" type="video/mp4">
+      </video>
+    </figure>
+    <figure>
+      <div class="plate"><img src="./cd-rcm-files/isotropic-cuts.jpg" alt="Sagittal, coronal and oblique cuts through two stacks, comparing the sparse input stack with the CD-RCM densified stack." loading="lazy" width="2623" height="1409"></div>
+      <figcaption><b>Cross-sectional and arbitrary-plane visualization of densified stacks.</b> Sagittal and coronal cross-sections (left) and oblique cuts at specified azimuth, elevation, and offset (right) for two example stacks show markedly smoother transitions along <em>z</em> than the sparsely sampled input stacks.</figcaption>
+    </figure>
+  </section>
+
+  <section id="expert">
+    <h2>Blinded expert evaluation</h2>
+    <p>Pixel metrics don’t fully capture morphological fidelity, so an RCM expert with about 20 years of experience evaluated anonymized, randomized slices in two tasks. First, they rated individual slices from 1 to 3 for suitability for evaluating morphology, presence of implausible structures, and interpretation confidence. Second, they chose which of four reconstructions looked most like a withheld ground-truth slice, with inputs spaced 1.5× wider than during training.</p>
+    <div class="two-up">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Suitability ↑</th><th>Implausibility ↓</th><th>Confidence ↑</th></tr></thead>
+          <tbody>
+            <tr><td>Acquired (ground truth)</td><td>2.40 (0.89)</td><td>1.80 (0.84)</td><td>2.40 (0.89)</td></tr>
+            <tr class="group"><td>B-spline</td><td>2.60 (0.55)</td><td>1.80 (0.84)</td><td>2.80 (0.45)</td></tr>
+            <tr><td>Gaussian</td><td>1.60 (0.55)</td><td>2.00 (0.71)</td><td>2.00 (0.71)</td></tr>
+            <tr><td>FILM fine-tuned</td><td>1.80 (0.45)</td><td>2.00 (0.71)</td><td>2.00 (0.71)</td></tr>
+            <tr class="ours"><td>CD-RCM (ours)</td><td>2.40 (0.55)</td><td>1.60 (0.55)</td><td>2.60 (0.55)</td></tr>
+          </tbody>
+        </table>
+        <p class="table-note">Image quality: mean (SD) of ratings on a 1–3 scale, 5 slices per method.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Times chosen</th><th>Rate</th></tr></thead>
+          <tbody>
+            <tr><td>B-spline</td><td>3</td><td>12.0%</td></tr>
+            <tr><td>Gaussian</td><td>0</td><td>0.0%</td></tr>
+            <tr><td>FILM fine-tuned</td><td>0</td><td>0.0%</td></tr>
+            <tr class="ours"><td>CD-RCM (ours)</td><td>22</td><td>88.0%</td></tr>
+          </tbody>
+        </table>
+        <p class="table-note">Similarity to ground truth: 25 cases.</p>
+      </div>
+    </div>
+    <p style="margin-top:1.25rem">CD-RCM slices were rated on par with acquired slices, while the smoothest methods, Gaussian interpolation and fine-tuned FILM, received the lowest suitability and confidence. CD-RCM achieved the lowest LPIPS on all 25 similarity cases, and the expert’s choices tracked perceptual similarity rather than pixel-wise error. With a single reader and a small sample, we treat these results as indicative rather than a formal non-inferiority test.</p>
+  </section>
+
+  <section id="ablation">
+    <h2>Ablation study</h2>
+    <p>All variants include the MSE loss and are trained at 256 × 256 for 20k steps. Replacing the VGG-based perceptual loss with our skin-specific loss improves all four metrics, and the single final-layer formulation of L<sub>SPF</sub> outperforms a multi-layer variant.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Training objective (all + L<sub>MSE</sub>)</th><th>PSNR ↑</th><th>SSIM ↑</th><th>LPIPS ↓</th><th>L<sub>SPF</sub> ↓</th></tr></thead>
+        <tbody>
+          <tr><td>+ L<sub>LPIPS</sub></td><td>21.60</td><td>0.480</td><td>0.343</td><td>0.273</td></tr>
+          <tr class="group"><td>+ VGG perceptual loss</td><td>22.56</td><td>0.547</td><td>0.386</td><td>0.258</td></tr>
+          <tr><td>+ L<sub>LPIPS</sub> + VGG perceptual loss</td><td><u>22.65</u></td><td><u>0.567</u></td><td><u>0.329</u></td><td><u>0.216</u></td></tr>
+          <tr class="group"><td>+ L<sub>LPIPS</sub> + L<sub>SPF</sub> (multi-feature)</td><td>22.39</td><td>0.522</td><td>0.338</td><td>0.246</td></tr>
+          <tr class="ours"><td>+ L<sub>LPIPS</sub> + L<sub>SPF</sub> (ours)</td><td>23.35</td><td>0.597</td><td>0.288</td><td>0.172</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Second-best results are underlined.</p>
+  </section>
+  <section id="acknowledgments">
+    <h2>Acknowledgments</h2>
+    <p>The reading study was conducted by Dr. Miguel Cordova, an RCM imaging expert with approximately 20 years of experience acquiring and interpreting reflectance confocal microscopy images at the Dermatology Service of Memorial Sloan Kettering Cancer Center (MSKCC). This work is supported by grants DoD/USAMRAA HT94252410553 and DoD/USAMRAA HT94252410554, NIH/NCI R01CA199673, NIH/NCI U24-CA264369, R01CA293974, and NIH/NCI Cancer Center Support Grant P30 CA008748.</p>
+  </section>
+
+  <section id="bibtex">
+    <h2>BibTeX</h2>
+    <div class="bib">
+      <button class="copy" type="button" id="copy-bib">Copy</button>
+<pre id="bib-text">@inproceedings{imtiaz2026cdrcm,
+  title     = {CD-RCM: Generalizable Continuous-Depth Novel View Synthesis
+               for Reflectance Confocal Microscopy},
+  author    = {Imtiaz, Tooba and Rajadhyaksha, Milind and Kose, Kivanc and Dy, Jennifer},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026}
+}</pre>
+    </div>
+  </section>
+
+  <footer>
+    <a href="https://toobaimt.github.io">Tooba Imtiaz</a> &nbsp;·&nbsp; <a href="#">Back to top</a>
+  </footer>
+</main>
+
+<script>
+(function () {
+  // Explainer clips loop silently with no controls; pause them while off screen
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var clips = document.querySelectorAll('video[data-inline]');
+  if (reduce) {
+    // Reduced motion: don't autoplay; give the clips controls so they can be started by hand
+    clips.forEach(function (v) { v.removeAttribute('autoplay'); v.pause(); v.controls = true; });
+  } else {
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.play().catch(function () {}); }
+          else { e.target.pause(); }
+        });
+      }, { threshold: 0.4 });
+      clips.forEach(function (v) { io.observe(v); });
+    } else {
+      clips.forEach(function (v) { v.autoplay = true; v.play().catch(function () {}); });
+    }
+  }
+
+  document.getElementById('copy-bib').addEventListener('click', function () {
+    var btn = this;
+    navigator.clipboard.writeText(document.getElementById('bib-text').innerText).then(function () {
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+    }, function () { btn.textContent = 'Select and copy manually'; });
+  });
+})();
+</script>
+</body>
+</html>
