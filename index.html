@@ -136,6 +136,7 @@
       <li><a href="https://neurips.cc/virtual/2026/poster/156085">Paper</a></li>
       <li><a href="https://arxiv.org/abs/2606.12635">arXiv</a></li>
       <li><a href="https://recorder-v3.slideslive.com/?share=113470&amp;s=2eb5fe7f-dc49-4b39-9fc5-51cfddcbeebd">NeurIPS Talk</a></li>
+      <li><a href="./cd-rcm-files/NeurIPS2026_Poster.pdf" target="_blank" rel="noopener">Poster</a></li>
       <li><a href="#bibtex">BibTeX</a></li>
     </ul>
   </header>
@@ -167,7 +168,11 @@
         <source src="./cd-rcm-files/videos/rcm-stack.mp4" type="video/mp4">
       </video>
     </figure>
-    <p>Neural rendering usually reconstructs opaque objects from cameras placed around them, relying on parallax between viewpoints. RCM works differently: a confocal pinhole selects one thin optical section at a time, and the microscope steps the focal plane down through the tissue. Every slice shares the same lateral field of view, and the only thing that changes between slices is depth.</p>
+    <p>More importantly, clinicians are trained to identify anomalies and skin microstructures from histopathology images, which are vertically sectioned as illustrated on the right. These reveal tissue layer organization and depth structure directly in a single image that is oriented orthogonal to the skin surface. Instead, if they are given these RCM stacks on the left, the clinicians must mentally infer cross-sectional tissue structure from sparsely sampled depths.</p>
+    <figure>
+      <div class="plate"><img src="./cd-rcm-files/zstack-vs-cross-sections.jpg" alt="Left: an RCM z-stack of en-face slices at successive depths. Right: coronal, sagittal and angular cross-sections cut through the same volume." loading="lazy" width="1634" height="764"></div>
+    </figure>
+    <p>For conventional surface-level imaging, neural rendering usually reconstructs opaque objects from cameras placed around them, relying on parallax between viewpoints. RCM works differently: a confocal pinhole selects one thin optical section at a time, and the microscope steps the focal plane down through the tissue. Every slice shares the same lateral field of view, and the only thing that changes between slices is depth.</p>
     <figure>
       <div class="plate"><img src="./cd-rcm-files/imaging-modalities.png" alt="Three imaging paradigms: surface-level imaging with cameras around an opaque object, CT with X-ray projections, and RCM capturing en-face slices at successive depths of skin." loading="lazy" width="2000" height="600"></div>
       <figcaption><b>Comparison of imaging paradigms.</b> (a) Surface-level imaging reconstructs opaque objects from multiple posed viewpoints with geometric parallax. (b) CT acquires transmission projections from multiple angles and reconstructs 3D structure from X-ray attenuation. (c) RCM performs axial optical sectioning, capturing discrete en-face slices of internal tissue at successive depths.</figcaption>
@@ -182,7 +187,7 @@
     </figure>
 
     <h3>A virtual camera that only moves in depth</h3>
-    <p>RCM has no physical camera parameters, but its acquisition gives strong geometric priors: consecutive slices are laterally aligned and differ only in axial position. We model each slice as a pinhole camera with fixed orientation translated along <em>z</em>, canonicalize each stack into a shared normalized coordinate system, and compute pixel-wise Plücker ray embeddings from these virtual cameras. This lets us reuse transformer architectures built for multi-view geometry.</p>
+    <p>RCM has no physical camera parameters, but its acquisition gives strong geometric priors, for consecutive slices are laterally aligned and differ only in axial position. We model each slice as a pinhole camera with fixed orientation translated along <em>z</em>, canonicalize each stack into a shared normalized coordinate system, and compute pixel-wise Plücker ray embeddings from these virtual cameras. This lets us reuse transformer architectures built for multi-view geometry.</p>
     <figure>
       <video class="film" data-inline autoplay muted loop playsinline disablepictureinpicture preload="auto" poster="./cd-rcm-files/videos/virtual-camera-poster.jpg" width="1280" height="720" aria-label="Animation: a virtual pinhole camera translates along z through the stack, casting Plücker rays onto each slice.">
         <source src="./cd-rcm-files/videos/virtual-camera.mp4" type="video/mp4">
@@ -263,7 +268,7 @@
             <tr class="ours"><td>CD-RCM (ours)</td><td>2.40 (0.55)</td><td>1.60 (0.55)</td><td>2.60 (0.55)</td></tr>
           </tbody>
         </table>
-        <p class="table-note">Image quality: mean (SD) of ratings on a 1–3 scale, 5 slices per method.</p>
+        <p class="table-note">Image quality. Mean (SD) of ratings on a 1–3 scale, 5 slices per method.</p>
       </div>
       <div class="table-wrap">
         <table>
@@ -275,7 +280,7 @@
             <tr class="ours"><td>CD-RCM (ours)</td><td>22</td><td>88.0%</td></tr>
           </tbody>
         </table>
-        <p class="table-note">Similarity to ground truth: 25 cases.</p>
+        <p class="table-note">Similarity to ground truth across 25 cases.</p>
       </div>
     </div>
     <p style="margin-top:1.25rem">CD-RCM slices were rated on par with acquired slices, while the smoothest methods, Gaussian interpolation and fine-tuned FILM, received the lowest suitability and confidence. CD-RCM achieved the lowest LPIPS on all 25 similarity cases, and the expert’s choices tracked perceptual similarity rather than pixel-wise error. With a single reader and a small sample, we treat these results as indicative rather than a formal non-inferiority test.</p>
